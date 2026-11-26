@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Записи — LectureFlow</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/css/app.css">
+  <script type="module" src="/js/recordings-page.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="/">LectureFlow</a>
+      <nav class="nav" aria-label="Основная навигация">
+        <a href="/" aria-current="page">Записи</a>
+        <a href="/search.html">Поиск</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="card" aria-labelledby="create-title">
+      <h1 id="create-title">Новая запись</h1>
+      <p class="muted small">Загрузите аудио лекции: backend сохранит его, а worker распознает речь и подготовит конспекты частей.</p>
+      <form id="create-form" class="form-grid" novalidate>
+        <div class="field">
+          <label for="create-title-input">Название</label>
+          <input id="create-title-input" name="title" type="text" maxlength="255" required autocomplete="off"
+                 placeholder="Например, Лекция 3. Сенсоры беспилотников">
+        </div>
+        <div class="field">
+          <label for="create-file-input">Аудиофайл</label>
+          <input id="create-file-input" name="file" type="file" required
+                 accept="audio/*,.m4a,.mp3,.wav,.ogg,.oga,.opus,.flac,.aac,.webm,.mp4"
+                 aria-describedby="create-file-hint">
+          <div id="create-file-hint" class="hint">M4A, MP3, WAV, OGG/Opus, FLAC, WebM или AAC, до 200 МБ.</div>
+        </div>
+        <div class="actions">
+          <button id="create-submit" class="button" type="submit">Создать и загрузить</button>
+        </div>
+        <div id="create-progress" class="progress" hidden>
+          <progress id="create-progress-bar" max="100" value="0" aria-describedby="create-progress-text"></progress>
+          <div id="create-progress-text" class="small muted" aria-live="polite"></div>
+        </div>
+        <div id="create-message" class="message" role="alert"></div>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="list-title">
+      <div class="toolbar">
+        <h2 id="list-title">Все записи</h2>
+        <div class="field">
+          <label for="sort-select" class="small">Сортировка</label>
+          <select id="sort-select">
+            <option value="createdAt,desc">Сначала новые</option>
+            <option value="createdAt,asc">Сначала старые</option>
+            <option value="title,asc">По названию, А–Я</option>
+            <option value="title,desc">По названию, Я–А</option>
+          </select>
+        </div>
+      </div>
+      <div id="list-message" class="message" role="alert"></div>
+      <div id="list-loading" class="muted" aria-live="polite"><span class="spinner" aria-hidden="true"></span> Загружаем записи…</div>
+      <ul id="recording-list" class="recording-list" aria-labelledby="list-title"></ul>
+      <p id="list-empty" class="empty-state" hidden>Записей пока нет. Загрузите первую лекцию через форму выше.</p>
+      <nav id="pagination" class="pagination" aria-label="Страницы списка" hidden>
+        <button id="prev-page" class="button button--secondary button--small" type="button">← Назад</button>
+        <span id="page-info" class="small muted"></span>
+        <button id="next-page" class="button button--secondary button--small" type="button">Вперёд →</button>
+      </nav>
+    </section>
+  </main>
+
+  <dialog id="rename-dialog" aria-labelledby="rename-dialog-title">
+    <form id="rename-form" method="dialog" novalidate>
+      <h2 id="rename-dialog-title">Переименовать запись</h2>
+      <div class="field">
+        <label for="rename-input">Новое название</label>
+        <input id="rename-input" type="text" maxlength="255" required autocomplete="off">
+      </div>
+      <div id="rename-message" class="message" role="alert"></div>
+      <div class="actions">
+        <button id="rename-cancel" class="button button--secondary" type="button">Отмена</button>
+        <button id="rename-submit" class="button" type="submit">Сохранить</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="delete-dialog" aria-labelledby="delete-dialog-title">
+    <h2 id="delete-dialog-title">Удалить запись?</h2>
+    <p id="delete-dialog-text"></p>
+    <div id="delete-message" class="message" role="alert"></div>
+    <div class="actions">
+      <button id="delete-cancel" class="button button--secondary" type="button">Отмена</button>
+      <button id="delete-confirm" class="button button--danger" type="button">Удалить</button>
+    </div>
+  </dialog>
+</body>
+</html>

@@ -1,0 +1,109 @@
+services:
+  opensearch:
+    image: opensearchproject/opensearch:3.9.0
+    ports:
+      - "127.0.0.1:9200:9200"
+    environment:
+      discovery.type: single-node
+      DISABLE_SECURITY_PLUGIN: "true"
+      OPENSEARCH_JAVA_OPTS: "-Xms512m -Xmx512m"
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' > /dev/null"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 30s
+
+  postgres:
+    image: postgres:17
+    ports:
+      - "127.0.0.1:5433:5432"
+    environment:
+      POSTGRES_DB: lectureflow
+      POSTGRES_USER: lectureflow
+      POSTGRES_PASSWORD: ${LECTUREFLOW_DB_PASSWORD:?Set LECTUREFLOW_DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "lectureflow", "-d", "lectureflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  rustfs:
+    image: rustfs/rustfs:latest
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    environment:
+      RUSTFS_ACCESS_KEY: ${LECTUREFLOW_S3_ACCESS_KEY:?Set LECTUREFLOW_S3_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${LECTUREFLOW_S3_SECRET_KEY:?Set LECTUREFLOW_S3_SECRET_KEY}
+      RUSTFS_CONSOLE_ENABLE: "true"
+    volumes:
+      - rustfs-data:/data
+    command: ["/data"]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    hostname: rabbitmq
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: lectureflow
+      RABBITMQ_DEFAULT_PASS: ${LECTUREFLOW_RABBITMQ_PASSWORD:?Set LECTUREFLOW_RABBITMQ_PASSWORD}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 20s
+
+  backend:
+    build: ./lectureflow-backend
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      LECTUREFLOW_OPENSEARCH_URL: http://opensearch:9200
+      LECTUREFLOW_OPENSEARCH_INDEX: ${LECTUREFLOW_OPENSEARCH_INDEX:-transcription-segments-v2}
+      LECTUREFLOW_DB_URL: jdbc:postgresql://postgres:5432/lectureflow
+      LECTUREFLOW_DB_PASSWORD: ${LECTUREFLOW_DB_PASSWORD:?Set LECTUREFLOW_DB_PASSWORD}
+      LECTUREFLOW_S3_ENDPOINT: http://rustfs:9000
+      LECTUREFLOW_S3_ACCESS_KEY: ${LECTUREFLOW_S3_ACCESS_KEY:?Set LECTUREFLOW_S3_ACCESS_KEY}
+      LECTUREFLOW_S3_SECRET_KEY: ${LECTUREFLOW_S3_SECRET_KEY:?Set LECTUREFLOW_S3_SECRET_KEY}
+      LECTUREFLOW_S3_BUCKET: ${LECTUREFLOW_S3_BUCKET:-lectureflow-audio}
+      LECTUREFLOW_RABBITMQ_HOST: rabbitmq
+      LECTUREFLOW_RABBITMQ_PASSWORD: ${LECTUREFLOW_RABBITMQ_PASSWORD:?Set LECTUREFLOW_RABBITMQ_PASSWORD}
+      LECTUREFLOW_MAX_UPLOAD_SIZE: ${LECTUREFLOW_MAX_UPLOAD_SIZE:-200MB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rustfs:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  postgres-data:
+  rustfs-data:
+  rabbitmq-data:
+  opensearch-data:

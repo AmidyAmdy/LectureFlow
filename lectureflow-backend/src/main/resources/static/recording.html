@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Запись — LectureFlow</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/css/app.css">
+  <script type="module" src="/js/recording-page.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="/">LectureFlow</a>
+      <nav class="nav" aria-label="Основная навигация">
+        <a href="/">Записи</a>
+        <a href="/search.html">Поиск</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <a class="back-link" href="/">← Все записи</a>
+    <div id="page-message" class="message" role="alert"></div>
+    <div id="page-loading" class="muted" aria-live="polite"><span class="spinner" aria-hidden="true"></span> Загружаем запись…</div>
+
+    <div id="recording-view" hidden>
+      <section class="card">
+        <div class="recording-header">
+          <div>
+            <h1 id="recording-title"></h1>
+            <div class="muted small">Создана <span id="recording-date"></span></div>
+          </div>
+          <div id="recording-status" aria-live="polite"></div>
+        </div>
+
+        <div id="status-panel" class="status-panel" aria-live="polite"></div>
+        <div id="action-message" class="message" role="alert"></div>
+
+        <div id="failure-actions" class="actions failure-actions" hidden>
+          <button id="retry-button" class="button" type="button">Повторить обработку</button>
+        </div>
+
+        <details id="resend-details" class="extra" hidden>
+          <summary>Обработка долго не продвигается?</summary>
+          <p class="small muted">Проверьте, что Python-worker и Ollama запущены. Если задание потерялось по дороге
+            в очередь, его можно отправить ещё раз: готовые результаты worker переиспользует.</p>
+          <button id="resend-button" class="button button--secondary button--small" type="button">Отправить задание повторно</button>
+        </details>
+
+        <form id="upload-form" class="form-grid" novalidate hidden>
+          <div class="field">
+            <label id="upload-label" for="upload-file">Аудиофайл</label>
+            <input id="upload-file" type="file" required
+                   accept="audio/*,.m4a,.mp3,.wav,.ogg,.oga,.opus,.flac,.aac,.webm,.mp4"
+                   aria-describedby="upload-hint">
+            <div id="upload-hint" class="hint">M4A, MP3, WAV, OGG/Opus, FLAC, WebM или AAC, до 200 МБ.</div>
+          </div>
+          <div class="actions">
+            <button id="upload-submit" class="button" type="submit">Загрузить аудио</button>
+          </div>
+          <div id="upload-progress" class="progress" hidden>
+            <progress id="upload-progress-bar" max="100" value="0"></progress>
+            <div id="upload-progress-text" class="small muted" aria-live="polite"></div>
+          </div>
+        </form>
+
+        <details id="replace-details" class="extra" hidden>
+          <summary>Заменить аудио</summary>
+          <p class="small muted">Текущие транскрипция и конспекты будут удалены, обработка начнётся заново.</p>
+          <div id="replace-slot"></div>
+        </details>
+      </section>
+
+      <section id="player-card" class="card player" aria-label="Аудиоплеер" hidden>
+        <audio id="audio" controls preload="metadata"></audio>
+      </section>
+
+      <div class="results">
+        <section class="card" aria-labelledby="summaries-title">
+          <h2 id="summaries-title">Конспекты частей</h2>
+          <div id="summaries-content"></div>
+        </section>
+
+        <section class="card" aria-labelledby="transcript-title">
+          <h2 id="transcript-title">Транскрипция</h2>
+          <button id="download-transcript" class="button button--secondary button--small" type="button" disabled>Скачать текст</button>
+          <div id="transcript-content"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,42 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "analysis": {
+      "char_filter": {
+        "russian_yo": {
+          "type": "mapping",
+          "mappings": ["ё => е", "Ё => Е"]
+        }
+      },
+      "filter": {
+        "russian_stop": {
+          "type": "stop",
+          "stopwords": "_russian_"
+        },
+        "russian_stemmer": {
+          "type": "stemmer",
+          "language": "russian"
+        }
+      },
+      "analyzer": {
+        "russian_text": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "char_filter": ["russian_yo"],
+          "filter": ["lowercase", "russian_stop", "russian_stemmer"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "recordingId": { "type": "long" },
+      "audioObjectKey": { "type": "keyword" },
+      "start": { "type": "double" },
+      "end": { "type": "double" },
+      "text": { "type": "text", "analyzer": "russian_text" }
+    }
+  }
+}

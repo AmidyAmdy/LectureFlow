@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Поиск — LectureFlow</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/css/app.css">
+  <script type="module" src="/js/search-page.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="/">LectureFlow</a>
+      <nav class="nav" aria-label="Основная навигация">
+        <a href="/">Записи</a>
+        <a href="/search.html" aria-current="page">Поиск</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="card" aria-labelledby="search-title">
+      <h1 id="search-title">Поиск по транскрипциям</h1>
+      <form class="search-form" action="/search.html" method="get" role="search">
+        <label for="search-input" class="visually-hidden">Что найти</label>
+        <input id="search-input" name="q" type="search" maxlength="200" required
+               placeholder="Слово или фраза из лекции">
+        <button class="button" type="submit">Найти</button>
+      </form>
+      <p class="small muted">Поиск учитывает формы слов: «сенсор» найдёт и «сенсоры». Ищутся фрагменты, где есть все слова запроса.</p>
+    </section>
+
+    <section class="card" aria-labelledby="results-title">
+      <h2 id="results-title">Результаты</h2>
+      <div id="search-message" class="message" role="alert"></div>
+      <p id="search-status" class="muted" aria-live="polite">Введите слово или фразу из лекции.</p>
+      <ol id="search-results" class="recording-list"></ol>
+      <nav id="search-pagination" class="pagination" aria-label="Страницы результатов" hidden>
+        <a id="search-prev" class="button button--secondary button--small" href="#">← Назад</a>
+        <span id="search-page-info" class="small muted"></span>
+        <a id="search-next" class="button button--secondary button--small" href="#">Вперёд →</a>
+      </nav>
+    </section>
+  </main>
+</body>
+</html>
